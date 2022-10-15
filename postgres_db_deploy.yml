@@ -1,6 +1,6 @@
 ---
 - name: Deploy a psql database with persistent storage
-  hosts: psql_database
+  hosts: localhost
   vars_prompt:
     - name: registry_username
       prompt: What is your registry_username?
@@ -11,25 +11,45 @@
       unsafe: yes
   tasks:
 
+    - name: Create group 'postgres'
+      ansible.builtin.group:
+        name: postgres
+        state: present
+        gid: 26
+      become: true
+      
+
+    - name: Create user 'postgres'
+      ansible.builtin.user:
+        name: postgres
+        uid: 26
+        group: postgres
+      become: true
+
     - name: Create local directory
       ansible.builtin.file:
         path: /home/rodli/local
+        state: directory
         owner: postgres
         group: postgres
         mode: '0755'
+      become: true
 
     - name: Create host directory
       ansible.builtin.file:
         path: /home/rodli/local/pgsql
+        state: directory
         owner: postgres
         group: postgres
         mode: '0755'
+      become: true
 
     - name: Apply the container_file_t SELinux context for the host directory
       community.general.sefcontext:
         target: '/home/rodli/local/pgsql(/.*)?'
         setype: container_file_t
         state: present
+      become: true
       notify: Apply new SELinux file context to the filesystem
 
     - name: Login to Red Hat Container Catalog
