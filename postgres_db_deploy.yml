@@ -94,6 +94,8 @@
 # Or the following environment variable:
 #   POSTGRESQL_ADMIN_PASSWORD
 # Or both.
+    - name: Populate nufarm table
+      ansible.builtin.command: podman exec -i sharesdb -- /usr/bin/psql -U rodli sharesdb < /home/$(whoami)/sharesdb_project/init_data_nufarm.sql
 
   handlers:
     - name: Apply new SELinux file context to the filesystem
